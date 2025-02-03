@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token :: AssociatedToken, token::{accessor::authority, transfer}, token_interface::{Mint, TokenAccount, TokenInterface, transfer_tokens}
+    associated_token :: AssociatedToken, token::{accessor::authority, transfer}, token_interface::{Mint, TokenAccount, TokenInterface}
 };
 
 use crate::Offer;
