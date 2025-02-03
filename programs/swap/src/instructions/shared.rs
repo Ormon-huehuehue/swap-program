@@ -10,7 +10,7 @@ pub fn transfer_tokens<'info>(
     token_program : &Interface<'info, TokenInterface>
 )-> Result<()>{
     
-    let transfer_accounts_options = TransferChecked{
+    let transfer_accounts_options = TransferChecked{    //The TransferChecked struct expects AccountInfo, but you have InterfaceAccount<TokenAccount>, so you use .to_account_info() to convert it.
         from : from.to_account_info(),
         mint : mint.to_account_info(),
         to : to.to_account_info(),

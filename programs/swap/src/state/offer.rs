@@ -8,6 +8,6 @@ pub struct Offer{
     pub maker : Pubkey,
     pub token_mint_a : Pubkey,
     pub token_mint_b : Pubkey,
-    token_b_wanted_amount : u64,
+    pub token_b_wanted_amount : u64,
     pub bump : u8
 }

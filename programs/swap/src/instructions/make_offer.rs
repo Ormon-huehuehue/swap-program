@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token :: AssociatedToken,
-    token_interface::{Mint, TokenAccount, TokenInterface}
+    associated_token :: AssociatedToken, token::{accessor::authority, transfer}, token_interface::{Mint, TokenAccount, TokenInterface, transfer_tokens}
 };
 
 use crate::Offer;
+
+use super::transfer_tokens;
 
 
 #[derive(Accounts)]
@@ -40,7 +41,7 @@ pub struct MakeOffer<'info>{
         init,
         payer = maker,
         associated_token::mint = token_mint_a,
-        associated_token::authority = offer,
+        associated_token::authority = offer,         // owned by the "Offer program account", not the user(payer)
         associated_token::token_program = token_program
 
     )]
@@ -52,6 +53,27 @@ pub struct MakeOffer<'info>{
 }
 
 
-pub fn handler(ctx: Context<MakeOffer>) -> Result<()> {
+pub fn send_offered_tokens_to_vault(ctx: &Context<MakeOffer>, token_a_offered_amount : u64) -> Result<()> {
+    transfer_tokens(
+        &ctx.accounts.maker_token_account,
+        &ctx.accounts.vault ,
+        &token_a_offered_amount, 
+        &ctx.accounts.token_mint_a, 
+        &ctx.accounts.maker, 
+        &ctx.accounts.token_program);
+
+    Ok(())
+}
+
+pub fn save_offer(ctx : Context<MakeOffer>, id : u64, token_b_wanted_amount : u64) -> Result<()>{
+    
+    ctx.accounts.offer.set_inner(Offer{
+        id,
+        maker : ctx.accounts.maker.key(),
+        token_mint_a : ctx.accounts.token_mint_a.key(),
+        token_mint_b : ctx.accounts.token_mint_b.key(),
+        token_b_wanted_amount,
+        bump : ctx.bumps.offer
+    });
     Ok(())
 }
