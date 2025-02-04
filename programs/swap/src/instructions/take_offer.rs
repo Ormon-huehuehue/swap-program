@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_interface::{transfer_checked, close_account, CloseAccount, Mint, TokenAccount, TokenInterface, TransferChecked}};
+use anchor_spl::{associated_token::AssociatedToken,
+ token_interface::{transfer_checked, close_account, CloseAccount, Mint, TokenAccount, TokenInterface, TransferChecked}};
 
 use crate::Offer;
 
@@ -22,17 +23,17 @@ pub struct TakeOffer<'info>{
         payer = taker,
         associated_token::mint = token_mint_a,
         associated_token::authority = taker,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program,
     )]
-    pub taker_token_account_a : InterfaceAccount<'info, TokenAccount>,
+    pub taker_token_account_a: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
-        mut, 
+        mut,
         associated_token::mint = token_mint_b,
         associated_token::authority = taker,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program,
     )]
-    pub taker_token_account_b : InterfaceAccount<'info, TokenAccount>,
+    pub taker_token_account_b: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -41,7 +42,7 @@ pub struct TakeOffer<'info>{
         associated_token::authority = maker,
         associated_token::token_program = token_program
     )]
-    pub maker_token_account_b : InterfaceAccount<'info, TokenAccount>,
+    pub maker_token_account_b: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -52,7 +53,7 @@ pub struct TakeOffer<'info>{
         seeds = [b"offer", maker.key().as_ref(), offer.id.to_le_bytes().as_ref()],
         bump = offer.bump
     )]
-    offer : Account<'info, Offer>,
+    offer : Box<Account<'info, Offer>>,
 
     #[account(
         mut, 
@@ -60,7 +61,7 @@ pub struct TakeOffer<'info>{
         associated_token::authority = offer,         
         associated_token::token_program = token_program
     )]
-    vault : InterfaceAccount<'info, TokenAccount>,
+    vault : Box<InterfaceAccount<'info, TokenAccount>>,
 
     pub system_program : Program<'info, System>,
     pub token_program : Interface<'info, TokenInterface>,
@@ -98,7 +99,10 @@ pub fn withdraw_and_close_vault(ctx : Context<TakeOffer>) -> Result<()> {   //PD
 
     let cpi_context = CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), accounts, &signer_seeds);
 
-    transfer_checked(cpi_context, ctx.accounts.vault.amount, ctx.accounts.token_mint_a.decimals);
+    transfer_checked(
+        cpi_context, 
+        ctx.accounts.vault.amount, 
+        ctx.accounts.token_mint_a.decimals)?;
 
     let accounts = CloseAccount{
         account : ctx.accounts.vault.to_account_info(),

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token :: AssociatedToken, token::{accessor::authority, transfer}, token_interface::{Mint, TokenAccount, TokenInterface}
+    associated_token :: AssociatedToken, token_interface::{Mint, TokenAccount, TokenInterface}
 };
 
 use crate::Offer;
@@ -60,9 +60,7 @@ pub fn send_offered_tokens_to_vault(ctx: &Context<MakeOffer>, token_a_offered_am
         &token_a_offered_amount, 
         &ctx.accounts.token_mint_a, 
         &ctx.accounts.maker, 
-        &ctx.accounts.token_program);
-
-    Ok(())
+        &ctx.accounts.token_program)
 }
 
 pub fn save_offer(ctx : Context<MakeOffer>, id : u64, token_b_wanted_amount : u64) -> Result<()>{
